@@ -20,6 +20,11 @@ dependencies {
     modApi(libs.hexcasting.{{ mappings(mojmap="common", yarn="fabric") }})
 
     modApi(libs.clothConfig.common)
+{% if use_mielib %}
+
+    // MieLib: compile against the Fabric jar (intermediary, same as the common project); each platform ships its own jar
+    modCompileOnly(libs.mielib.fabric) { isTransitive = false }
+{% endif %}
 
     libs.mixinExtras.common.also {
         implementation(it)

@@ -58,6 +58,25 @@ repositories {
             flatDir { dir(rootProject.file("libs")) }
         }
     }
+{% if use_mielib %}
+    // MieLib (Fabric) straight from its GitHub release assets:
+    // https://github.com/xm1221/MieLib/releases/download/<mielib-release>/<module>-<version>.jar
+    exclusiveContent {
+        filter {
+            includeGroup("cn.xm1221.mielib-github")
+        }
+        forRepository {
+            ivy {
+                name = "MieLib GitHub releases"
+                url = uri("https://github.com/xm1221/MieLib/releases/download/")
+                patternLayout {
+                    artifact("${libs.versions.mielib.release.get()}/[module]-[revision].[ext]")
+                }
+                metadataSources { artifact() }
+            }
+        }
+    }
+{% endif %}
 }
 
 java {

@@ -44,3 +44,12 @@ mandatory = true
 versionRange = "[${versions.hexcasting},)"
 ordering = "NONE"
 side = "BOTH"
+{% if use_mielib %}
+
+[[dependencies.{{ modid }}]]
+modId = "mielib"
+mandatory = true
+versionRange = "[0.0.2,)"
+ordering = "NONE"
+side = "BOTH"
+{% endif %}

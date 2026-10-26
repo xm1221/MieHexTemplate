@@ -7,9 +7,9 @@
 [versions]
 java = "17" # must be an integer
 
-kotlin = "1.9.22"
-kotlin-fabric = "1.10.18+kotlin.1.9.22"
-kotlin-forge = "4.10.0"
+kotlin = "2.2.21"
+kotlin-fabric = "1.13.7+kotlin.2.2.21"
+kotlin-forge = "4.12.0"
 
 # Minecraft
 
@@ -22,9 +22,9 @@ minecraft = "1.20.1"
 
 architectury = "9.2.14"
 architectury-plugin = { require="[3.4, 3.5[" }
-architectury-loom = { require="[1.7, 1.8[" }
+architectury-loom = { require="[1.9, 1.10[" }
 
-fabric-loader = "0.14.25"
+fabric-loader = "0.16.9"
 fabric-api = "0.87.0+1.20.1"
 
 forge = "1.20.1-47.2.0"
@@ -32,7 +32,7 @@ forge-dependency = "47" # for mods.toml
 
 # mods
 
-hexcasting = "0.11.3"
+hexcasting = "0.11.4"
 paucal = "0.6.0-pre-118"
 pkpcpbp = "0.2.0-pre-95"
 
@@ -47,9 +47,22 @@ serializationHooks = "0.4.99999"
 mixinExtras = "0.5.0"
 clothConfig = "11.1.106"
 modMenu = "7.1.0"
-inline = "1.20.1-1.0.1"
+inline = "1.20.1-1.2.2"
 
 caelus = "3.1.0+1.20"
+{% if use_mielib %}
+
+# MieLib + HexCLI (https://github.com/xm1221/MieLib)
+# Fabric: downloaded from the MieLib GitHub release named by mielib-release (see java.gradle.kts)
+# Forge: no public jar yet, vendored in libs/ (see libs/README.md)
+mielib = "0.0.2.1+1.20.1-SNAPSHOT"
+mielib-release = "hexcli-v1.0.0"
+# HexCLI client (hexcli-client.jar is taken from this installer release by scripts/hexcli-check.sh)
+hexcli = "1.0.0"
+# hexParse (dev runtime only): Modrinth version ids for 1.20.1-1.12.0
+hexparse-fabric = "wt2k5ALr"
+hexparse-forge = "EcCjvGFr"
+{% endif %}
 
 # other dependencies
 
@@ -110,6 +123,14 @@ caelus = { module="top.theillusivec4.caelus:caelus-forge", version.ref="caelus" 
 
 inline-fabric = { module="com.samsthenerd.inline:inline-fabric", version.ref="inline" }
 inline-forge  = { module="com.samsthenerd.inline:inline-forge", version.ref="inline" }
+{% if use_mielib %}
+
+mielib-fabric = { module="cn.xm1221.mielib-github:mielib-fabric", version.ref="mielib" }
+mielib-forge  = { module="libs:mielib-forge", version.ref="mielib" }
+
+hexparse-fabric = { module="maven.modrinth:hexparse", version.ref="hexparse-fabric" }
+hexparse-forge  = { module="maven.modrinth:hexparse", version.ref="hexparse-forge" }
+{% endif %}
 
 asm          = { module="org.ow2.asm:asm", version.ref="asm" }
 asm-analysis = { module="org.ow2.asm:asm-analysis", version.ref="asm" }

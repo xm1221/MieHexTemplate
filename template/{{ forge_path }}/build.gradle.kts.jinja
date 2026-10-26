@@ -86,6 +86,15 @@ dependencies {
         localRuntime(it)
         include(it)
     }
+{% if use_mielib %}
+
+    // MieLib (bundled via Jar-in-Jar). No public Forge jar yet: vendored in libs/, see libs/README.md
+    modImplementation(libs.mielib.forge) { isTransitive = false }
+    include(libs.mielib.forge) { isTransitive = false }
+
+    // hexParse: development runtime only (needed by HexCLI)
+    modLocalRuntime(libs.hexparse.forge) { isTransitive = false }
+{% endif %}
 }
 
 tasks {
