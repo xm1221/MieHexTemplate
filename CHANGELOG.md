@@ -1,5 +1,18 @@
 # Changelog
 
+## MieHexTemplate `0.1.0` - 2026-10-26
+
+Forked from HexDummy v2.2.4.
+
+### Changes
+
+- Updated to Hex Casting 0.11.4: Kotlin 2.2.21, fabric-language-kotlin 1.13.7, KotlinForForge 4.12.0, inline 1.2.2, Architectury Loom 1.9, fabric-loader 0.16.9, Gradle 8.11.1.
+- Added the `use_mielib` question (default yes). It adds MieLib (JiJ), hexParse (dev runtime only), `runHexCli`, `scripts/hexcli-check.sh`, example TSVs and the HexCLI skill.
+- Added the `Squaring Purification` example pattern.
+- Added the starter template repo workflow and `rename-mod.py`.
+
+# HexDummy changelog
+
 ## `2.2.4` - 2025-12-28
 
 ### Changes

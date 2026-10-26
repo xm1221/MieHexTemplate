@@ -1,11 +1,27 @@
-# HexDummy v2
+# MieHexTemplate
 
 [![powered by hexdoc](https://img.shields.io/endpoint?url=https://hexxy.media/api/v0/badge/hexdoc?label=1)](https://github.com/hexdoc-dev/hexdoc)
 
-This is an up-to-date, minimal, opinionated template for starting a **multiloader, Kotlin-based** Hex Casting addon on 1.20.1 with Architectury. Includes all necessary dependencies on both Forge and Fabric loaders, plus some demo bits.
+A [Copier](https://copier.readthedocs.io) template for **multiloader (Fabric + Forge), Kotlin-based** [Hex Casting](https://github.com/FallingColors/HexMod) addons on **Minecraft 1.20.1** with Architectury, targeting **Hex Casting 0.11.4**.
 
-> [!CAUTION]
-> **Do not fork or clone this repository** to set up a new mod! See the usage steps and FAQ for more details.
+MieHexTemplate is a fork of [HexDummy v2](https://github.com/FallingColors/hexdummy) by artynova and Falling Colors (MIT). Everything HexDummy does is kept: hexdoc, the CI and release workflows, and the Registrar helpers. On top of that it adds:
+
+- **Hex Casting 0.11.4** and the toolchain it needs: Kotlin 2.2.21, fabric-language-kotlin 1.13.7, KotlinForForge 4.12.0, Architectury Loom 1.9, Gradle 8.11.1.
+- An extra example pattern, `Squaring Purification` (`<modid>:square`), to show a minimal `ConstMediaAction`.
+- An optional **[MieLib](https://github.com/xm1221/MieLib) + HexCLI** development loop (the `use_mielib` question, default **yes**):
+  - MieLib as a Jar-in-Jar dependency on both loaders. Fabric comes from MieLib's GitHub release; Forge is vendored in `libs/`.
+  - [hexParse](https://modrinth.com/mod/hexparse) as a **dev-runtime-only** dependency, never shipped.
+  - `./gradlew runHexCli -PacceptEula=true`, a headless Fabric dev server with `-Dmielib.hexcli=true`.
+  - `scripts/hexcli-check.sh`, which runs `hexcli/examples.tsv` through `hexcli-client -e`. It compares stacks and messages, and reports parse errors (`hexParse: Unknown symbol`) separately from mishaps.
+  - `skills/hexcasting/SKILL.md`, a HexCLI / hexParse cheat sheet for humans and AI agents.
+
+  If you answer **no**, none of these files or dependencies are generated.
+
+> [!TIP]
+> Don't want to install Copier? A pre-rendered copy with the default answers lives in the GitHub template repo
+> [xm1221/MieHexTemplate-Starter](https://github.com/xm1221/MieHexTemplate-Starter). Click *Use this template*, then run
+> `python3 rename-mod.py --modid yourmod --package com.example.yourmod --name "Your Mod"`.
+> Copier is still the recommended way, because it can later `copier update` your project when this template changes.
 
 > [!TIP]
 > If you're writing a Fabric-only or Forge-only mod, you probably don't need this template. Consider using the [Fabric template mod generator](https://fabricmc.net/develop/template/) or [Forge MDK](https://docs.minecraftforge.net/en/1.20.1/gettingstarted/) instead.
@@ -16,12 +32,12 @@ This is an up-to-date, minimal, opinionated template for starting a **multiloade
    - [Git](https://github.com/git-guides/install-git)
    - [uv](https://docs.astral.sh/uv/getting-started/installation/)
    - Any IDE with Java and Kotlin support (recommended: [IntelliJ IDEA Community Edition](https://www.jetbrains.com/idea/download/?section=windows))
-2. Create, clone, and enter a **new** GitHub repo. You don't need to use any other project templates (e.g. IntelliJ's Minecraft mod template) with HexDummy.
+2. Create, clone, and enter a **new** GitHub repo. You don't need to use any other project templates (e.g. IntelliJ's Minecraft mod template) with MieHexTemplate.
 > [!CAUTION]
 > **Do not** fork/clone/copy this repo directly.
 3. From the repo root, run this command to copy the template, then follow the prompts to set it up:
    ```sh
-   uvx copier copy gh:FallingColors/hexdummy .
+   uvx copier copy gh:xm1221/MieHexTemplate .
    ```
 4. Set up your Python environment and lockfile:
    ```sh
@@ -55,9 +71,26 @@ This is an up-to-date, minimal, opinionated template for starting a **multiloade
 
 Further instructions TODO - look at [HexDebug](https://github.com/object-Object/HexDebug) or [IoticBlocks](https://github.com/object-Object/IoticBlocks) for examples, since this template is based heavily on those mods.
 
+## HexCLI development loop (`use_mielib = yes`)
+
+```sh
+./gradlew runHexCli -PacceptEula=true           # headless Fabric server, fabric/run/hexcli (you accept the Minecraft EULA)
+./scripts/hexcli-check.sh --accept-eula         # starts the server if needed, runs hexcli/examples.tsv, stops the server
+./scripts/hexcli-check.sh -f hexcli/examples-broken.tsv   # intentionally failing cases: one parse error, one mishap
+```
+
+`hexcli-check.sh` downloads `hexcli-client.jar` from MieLib's `hexcli-v1.0.0` release and checks it against `SHA256SUMS`. Each row of `hexcli/examples.tsv` is `name<TAB>code<TAB>outcome<TAB>stack<TAB>message-regex`, where the outcome is one of `OK`, `PARSE_ERROR`, `MISHAP` or `HEXCLI_ERROR`.
+
+## Starter repo and the publish workflow
+
+[`.github/workflows/publish-starter.yml`](.github/workflows/publish-starter.yml) renders this template with the default answers (`modid = miehexaddon`), builds it, and tests [`starter/rename-mod.py`](starter/rename-mod.py) on a copy. It then pushes the result as a single commit to the template repo `xm1221/MieHexTemplate-Starter`. That push replaces the starter's history.
+
+- Triggers: tags `v*`, or a manual run from the Actions tab. A manual run takes the inputs `target_repo`, `target_branch` and `dry_run`.
+- Required secret: **`STARTER_REPO_TOKEN`**. This is a fine-grained PAT with *Contents: read and write* on the starter repo. The secret name lives in the workflow's `TOKEN_SECRET_NAME` env.
+
 ## Resources
 
-See the following branches for up-to-date example projects generated using HexDummy:
+Upstream HexDummy example projects (without the MieHexTemplate changes):
 
 - [example/v2/mojmap](https://github.com/FallingColors/hexdummy/tree/example/v2/mojmap)
 - [example/v2/yarn](https://github.com/FallingColors/hexdummy/tree/example/v2/yarn)
@@ -70,7 +103,7 @@ The following repository contains an example of a project generated using HexDum
 
 ### Why isn't this a template repository / why shouldn't I fork this repo to set up my mod?
 
-HexDummy uses [Copier](https://copier.readthedocs.io), a Python app for generating projects from *parameterized* templates. When you run `uvx copier copy`, Copier clones this repository, prompts you for some values, then fills those values into many placeholders in the template, making a customized project with no placeholder values for you to have to replace by hand.
+MieHexTemplate (like HexDummy) uses [Copier](https://copier.readthedocs.io), a Python app for generating projects from *parameterized* templates. When you run `uvx copier copy`, Copier clones this repository, prompts you for some values, then fills those values into many placeholders in the template, making a customized project with no placeholder values for you to have to replace by hand.
 
 As a consequence, this repository by itself is *not* a working Minecraft mod - if you look in the [template](./template) directory, you'll see a lot of `.jinja` files with placeholders that still need to be filled in.
 
@@ -114,3 +147,9 @@ For a more concrete example, the template comes with an [example for registering
 - Investigate https://github.com/headlesshq/mc-server-test more. From the logs, it seems like the Fabric server test might not actually be loading any mods?
 - Fix the CI tests in this repository.
 - Figure out how to publish to CurseForge/Modrinth/GitHub without having to build the mod again.
+
+## Credits and license
+
+- [HexDummy v2](https://github.com/FallingColors/hexdummy), Copyright (c) 2025 artynova, Falling Colors. MIT. This repository is a fork of it.
+- [MieLib](https://github.com/xm1221/MieLib) (MIT): HexCLI, the vendored Forge jar and `skills/hexcasting/SKILL.md`.
+- MieHexTemplate changes: Copyright (c) 2026 xm1221. MIT. See [LICENSE](LICENSE).

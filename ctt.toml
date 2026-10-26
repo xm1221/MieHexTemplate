@@ -16,3 +16,7 @@ mappings_name = "Yarn"
 [output.".ctt/leading_number_username"]
 mappings_name = "Mojmap"
 github_user = "1leadingnum"
+
+[output.".ctt/no_mielib"]
+mappings_name = "Mojmap"
+use_mielib = false

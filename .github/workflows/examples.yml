@@ -1,10 +1,8 @@
 name: Deploy example projects
 
 on:
-  push:
-    branches:
-      - main
-      - v2
+  # upstream HexDummy deployed example branches on every push; opt-in here
+  workflow_dispatch:
 
 jobs:
   build:
