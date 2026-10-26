@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Run the bundled hexParse examples against a HexCLI dev server and compare the results.
 #
-#   scripts/hexcli-check.sh [--file hexcli/examples.tsv] [--accept-eula] [--no-start] [--keep-server] [-v]
+#   scripts/hexcli-check.sh [--platform fabric|forge] [--file hexcli/examples.tsv] [--accept-eula] [--no-start] [--keep-server] [-v]
 #
-# - Uses an already running `./gradlew runHexCli` server if {fabric}/run/hexcli/hexcli/client.json exists,
+# - --platform (or HEXCLI_PLATFORM) picks the dev server: fabric (default) or forge.
+# - Uses an already running `./gradlew :<platform>:runHexCli` server if <platform>/run/hexcli/hexcli/client.json exists,
 #   otherwise starts one (needs --accept-eula / HEXCLI_ACCEPT_EULA=1 the first time) and stops it afterwards.
 # - hexcli-client.jar is downloaded once from the MieLib HexCLI installer release (SHA-256 checked)
 #   into .gradle/hexcli/.
@@ -29,21 +30,28 @@ START=auto
 KEEP=0
 VERBOSE=0
 ACCEPT_EULA=${HEXCLI_ACCEPT_EULA:-0}
+PLATFORM=${HEXCLI_PLATFORM:-fabric}
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -f|--file) FILE=$2; shift 2 ;;
+    -p|--platform) PLATFORM=$2; shift 2 ;;
     --accept-eula) ACCEPT_EULA=1; shift ;;
     --no-start) START=never; shift ;;
     --keep-server) KEEP=1; shift ;;
     -v|--verbose) VERBOSE=1; shift ;;
-    -h|--help) sed -n '2,24p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,26p' "$0"; exit 0 ;;
     *) echo "hexcli-check: unknown option $1" >&2; exit 2 ;;
   esac
 done
 
-FABRIC_DIR=$(sed -n 's/^include("\([^"]*\)", "\([^"]*\)", "\([^"]*\)")$/\2/p' settings.gradle.kts)
-FABRIC_DIR=${FABRIC_DIR:-fabric}
-SERVER_DIR="$ROOT/$FABRIC_DIR/run/hexcli"
+# settings.gradle.kts: include("<common>", "<fabric>", "<forge>")
+case "$PLATFORM" in
+  fabric) n=2 ;; forge) n=3 ;;
+  *) echo "hexcli-check: --platform must be fabric or forge" >&2; exit 2 ;;
+esac
+PLATFORM_DIR=$(sed -n "s/^include(\"\([^\"]*\)\", \"\([^\"]*\)\", \"\([^\"]*\)\")\$/\\$n/p" settings.gradle.kts)
+PLATFORM_DIR=${PLATFORM_DIR:-$PLATFORM}
+SERVER_DIR="$ROOT/$PLATFORM_DIR/run/hexcli"
 CLIENT_JSON="$SERVER_DIR/hexcli/client.json"
 
 toml() { sed -n "s/^$1 *= *\"\([^\"]*\)\".*/\1/p" gradle/libs.versions.toml | head -n1; }
@@ -85,9 +93,9 @@ trap stop_server EXIT
 server_up() { [[ -f "$CLIENT_JSON" ]] && printf 'quit\n' | hexcli >/dev/null 2>&1; }
 
 if ! server_up; then
-  if [[ "$START" == never ]]; then echo "hexcli-check: no HexCLI server at $SERVER_DIR (run ./gradlew runHexCli)" >&2; exit 2; fi
+  if [[ "$START" == never ]]; then echo "hexcli-check: no HexCLI server at $SERVER_DIR (run ./gradlew :$PLATFORM_DIR:runHexCli)" >&2; exit 2; fi
   rm -f "$CLIENT_JSON"   # stale file from a killed server
-  args=(":$FABRIC_DIR:runHexCli" --console=plain)
+  args=(":$PLATFORM_DIR:runHexCli" --console=plain)
   [[ "$ACCEPT_EULA" == 1 ]] && args+=(-PacceptEula=true)
   mkdir -p build
   echo "hexcli-check: starting ./gradlew ${args[*]} (log: build/hexcli-server.log)"
@@ -145,5 +153,5 @@ while IFS=$'\t' read -r name code expect stack msg || [[ -n "${name:-}" ]]; do
   [[ "$VERBOSE" == 1 ]] && sed 's/^/        | /' <<<"$out"
 done <"$FILE"
 
-echo "hexcli-check: $pass/$n passed ($FILE)"
+echo "hexcli-check: $pass/$n passed ($FILE, $PLATFORM)"
 [[ $fail -eq 0 && $n -gt 0 ]]

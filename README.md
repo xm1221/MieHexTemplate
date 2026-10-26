@@ -1,5 +1,7 @@
 # MieHexTemplate
 
+**English** | [简体中文](README.zh-CN.md)
+
 [![powered by hexdoc](https://img.shields.io/endpoint?url=https://hexxy.media/api/v0/badge/hexdoc?label=1)](https://github.com/hexdoc-dev/hexdoc)
 
 A [Copier](https://copier.readthedocs.io) template for **multiloader (Fabric + Forge), Kotlin-based** [Hex Casting](https://github.com/FallingColors/HexMod) addons on **Minecraft 1.20.1** with Architectury, targeting **Hex Casting 0.11.4**.
@@ -11,7 +13,7 @@ MieHexTemplate is a fork of [HexDummy v2](https://github.com/FallingColors/hexdu
 - An optional **[MieLib](https://github.com/xm1221/MieLib) + HexCLI** development loop (the `use_mielib` question, default **yes**):
   - MieLib as a Jar-in-Jar dependency on both loaders. Fabric comes from MieLib's GitHub release; Forge is vendored in `libs/`.
   - [hexParse](https://modrinth.com/mod/hexparse) as a **dev-runtime-only** dependency, never shipped.
-  - `./gradlew runHexCli -PacceptEula=true`, a headless Fabric dev server with `-Dmielib.hexcli=true`.
+  - `./gradlew :fabric:runHexCli -PacceptEula=true` and `./gradlew :forge:runHexCli -PacceptEula=true`, headless Fabric / Forge dev servers with `-Dmielib.hexcli=true`.
   - `scripts/hexcli-check.sh`, which runs `hexcli/examples.tsv` through `hexcli-client -e`. It compares stacks and messages, and reports parse errors (`hexParse: Unknown symbol`) separately from mishaps.
   - `skills/hexcasting/SKILL.md`, a HexCLI / hexParse cheat sheet for humans and AI agents.
 
@@ -74,10 +76,16 @@ Further instructions TODO - look at [HexDebug](https://github.com/object-Object/
 ## HexCLI development loop (`use_mielib = yes`)
 
 ```sh
-./gradlew runHexCli -PacceptEula=true           # headless Fabric server, fabric/run/hexcli (you accept the Minecraft EULA)
+./gradlew :fabric:runHexCli -PacceptEula=true   # headless Fabric server in fabric/run/hexcli (you accept the Minecraft EULA)
+./gradlew :forge:runHexCli -PacceptEula=true    # the same on Forge, in forge/run/hexcli
 ./scripts/hexcli-check.sh --accept-eula         # starts the server if needed, runs hexcli/examples.tsv, stops the server
-./scripts/hexcli-check.sh -f hexcli/examples-broken.tsv   # intentionally failing cases: one parse error, one mishap
+./scripts/hexcli-check.sh --platform forge --accept-eula   # the same against the Forge server
+./scripts/hexcli-check.sh -f hexcli/examples-broken.tsv    # intentionally failing cases: one parse error, one mishap
 ```
+
+Always use the `:fabric:` or `:forge:` prefix. A bare `./gradlew runHexCli` makes Gradle start both servers one after another, and the second never starts because the first doesn't exit.
+
+On Forge the `runHexCli` run adds `-Djava.net.preferIPv4Stack=true`. Forge launches with `-Djava.net.preferIPv6Addresses=system`, so MieLib's HexCLI endpoint (`InetAddress.getLoopbackAddress()`) would listen on `[::1]` while `hexcli/client.json` says `127.0.0.1`, and the client would get `Connection refused`.
 
 `hexcli-check.sh` downloads `hexcli-client.jar` from MieLib's `hexcli-v1.0.0` release and checks it against `SHA256SUMS`. Each row of `hexcli/examples.tsv` is `name<TAB>code<TAB>outcome<TAB>stack<TAB>message-regex`, where the outcome is one of `OK`, `PARSE_ERROR`, `MISHAP` or `HEXCLI_ERROR`.
 
@@ -87,6 +95,16 @@ Further instructions TODO - look at [HexDebug](https://github.com/object-Object/
 
 - Triggers: tags `v*`, or a manual run from the Actions tab. A manual run takes the inputs `target_repo`, `target_branch` and `dry_run`.
 - Required secret: **`STARTER_REPO_TOKEN`**. This is a fine-grained PAT with *Contents: read and write* on the starter repo. The secret name lives in the workflow's `TOKEN_SECRET_NAME` env.
+
+### The rename script, `rename-mod.py`
+
+The Starter repo ships this stdlib-only script at its root. It replaces the mod id, package, class-name prefix, display name and GitHub user/repo in one go, and moves or renames the matching directories and files:
+
+```sh
+python3 rename-mod.py --modid mymod --package io.github.me.mymod --name "My Mod" --github-user me
+# optional: --classname MyMod --github-repo mymod --dry-run
+./gradlew build
+```
 
 ## Resources
 
@@ -138,6 +156,10 @@ val REGISTERED_THING = register("registered_thing") { ThingConstructor("paramete
 The value returned by `register` is an [`Entry<V>`](https://github.com/object-Object/HexDummyExample/blob/a7d8d5b58bd018a62456e4653fe46ba3eb22bc69/common/src/main/kotlin/io/github/objectobject/hexdummyexample/registry/HexdummyexampleRegistrar.kt#L50). You can use this to access the registered thing's id (`.id`) or ResourceKey (`.key`), and when you're sure registration has finished, the actual registered instance (`.value`).
 
 For a more concrete example, the template comes with an [example for registering patterns](https://github.com/object-Object/HexDummyExample/blob/a7d8d5b58bd018a62456e4653fe46ba3eb22bc69/common/src/main/kotlin/io/github/objectobject/hexdummyexample/registry/HexdummyexampleActions.kt), and HexDebug has [several more examples](https://github.com/object-Object/HexDebug/tree/5db5f78f5489863e2c20a3df472571a984877b7d/Common/src/main/kotlin/gay/object/hexdebug/registry) for various types of registries.
+
+### Is Yarn supported?
+
+Not yet. Yarn support in upstream HexDummy is unfinished, and the example code uses Mojmap class names, so a Yarn project currently fails to compile. Use the default, Mojmap.
 
 ## TODO
 

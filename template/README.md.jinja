@@ -1,5 +1,7 @@
 # {{ display_name }}
 
+**English** | [简体中文](README.zh-CN.md)
+
 [![powered by hexdoc](https://img.shields.io/endpoint?url=https://hexxy.media/api/v0/badge/hexdoc?label=1)](https://github.com/hexdoc-dev/hexdoc)
 
 {{ description }}
@@ -12,22 +14,26 @@ dedicated server that runs [hexParse](https://modrinth.com/mod/hexparse) code an
 ravenmind and mishaps. hexParse is only on the development runtime; it is not a dependency of the published mod.
 
 ```sh
-# 1. start the HexCLI server (Fabric dev server with -Dmielib.hexcli=true). The first time you must accept the
+# 1. start a HexCLI server (dev server with -Dmielib.hexcli=true). The first time you must accept the
 #    Minecraft EULA (https://aka.ms/MinecraftEULA):
-./gradlew runHexCli -PacceptEula=true
+./gradlew :{{ fabric_path }}:runHexCli -PacceptEula=true     # Fabric, in {{ fabric_path }}/run/hexcli
+./gradlew :{{ forge_path }}:runHexCli -PacceptEula=true      # or Forge, in {{ forge_path }}/run/hexcli
 
 # 2. in another terminal: run the bundled examples (hexcli/examples.tsv) and compare the stacks
 ./scripts/hexcli-check.sh
 #    (with no server running, the script starts one itself and stops it afterwards:
 #     ./scripts/hexcli-check.sh --accept-eula)
+#    add --platform forge to use the Forge server instead of the Fabric one
 
 # 3. see how a parse error and a mishap are reported (this one is expected to FAIL)
 ./scripts/hexcli-check.sh -f hexcli/examples-broken.tsv
 ```
 
 `scripts/hexcli-check.sh` downloads `hexcli-client.jar` from the MieLib HexCLI release (SHA-256 checked) into
-`.gradle/hexcli/`. To play interactively:
-`java -jar .gradle/hexcli/hexcli-client-*.jar --dir {{ fabric_path }}/run/hexcli`.
+`.gradle/hexcli/`. Always run `runHexCli` with the `:{{ fabric_path }}:` or `:{{ forge_path }}:` prefix: a bare
+`./gradlew runHexCli` makes Gradle start both servers one after another, and the second one never starts.
+To play interactively:
+`java -jar .gradle/hexcli/hexcli-client-*.jar --dir {{ fabric_path }}/run/hexcli` (or `--dir {{ forge_path }}/run/hexcli`).
 
 The check script tells the failure types apart:
 

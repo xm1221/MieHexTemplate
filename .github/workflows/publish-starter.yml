@@ -39,6 +39,9 @@ env:
   STARTER_NAME: MieHex Addon
   STARTER_CLASSNAME: MieHexAddon
   STARTER_GITHUB_USER: xm1221
+  # author of the generated Starter commit
+  COMMIT_AUTHOR_NAME: xm1221
+  COMMIT_AUTHOR_EMAIL: 3850632202@qq.com
 
 permissions:
   contents: read
@@ -97,8 +100,8 @@ jobs:
           cd starter
           rm -rf .git build */build .gradle
           git init -q -b "$TARGET_BRANCH"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "$COMMIT_AUTHOR_NAME"
+          git config user.email "$COMMIT_AUTHOR_EMAIL"
           git add -A
           git update-index --chmod=+x gradlew rename-mod.py
           if [ -f scripts/hexcli-check.sh ]; then git update-index --chmod=+x scripts/hexcli-check.sh; fi

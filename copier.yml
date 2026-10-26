@@ -75,7 +75,7 @@ use_mielib:
   type: bool
   help: |
     Depend on MieLib + HexCLI? (adds MieLib, hexParse as a dev-runtime mod, a headless
-    `runHexCli` server task, a hexcli-client example check script, and skills/hexcasting/SKILL.md)
+    `:fabric:runHexCli` / `:forge:runHexCli` server tasks, a hexcli-client example check script, and skills/hexcasting/SKILL.md)
   default: true
 
 advanced:
@@ -185,8 +185,8 @@ _message_after_copy: |-
        git commit -m "Set up mod template"
        git push
   6. Set up GitHub Pages: https://hexdoc.hexxy.media/docs/guides/deployment/github-pages
-  7. Set up the release workflow: https://github.com/FallingColors/hexdummy#usage
+  7. Set up the release workflow: https://github.com/xm1221/MieHexTemplate#usage
   {% if use_mielib %}
-  8. Try HexCLI: ./gradlew runHexCli -PacceptEula=true   (then, in another terminal)
-       ./scripts/hexcli-check.sh
+  8. Try HexCLI: ./scripts/hexcli-check.sh --accept-eula   (starts/stops ./gradlew :{{ fabric_path }}:runHexCli itself;
+       add --platform forge for the Forge server). See README.md / README.zh-CN.md.
   {% endif %}

@@ -1,4 +1,5 @@
 {% if use_mielib %}
+import {{ modid }}.utils.configureHexCliServer
 import {{ modid }}.utils.extractNestedJar
 
 {% endif %}plugins {
@@ -42,6 +43,22 @@ loom {
                 property("{{ modid }}.$platform-datagen", "true")
             }
         }
+{% if use_mielib %}
+
+        // Headless Forge dedicated server with HexCLI enabled (MieLib + hexParse). Started by `./gradlew :{{ forge_path }}:runHexCli`.
+        // The client endpoint is written to {{ forge_path }}/run/hexcli/hexcli/client.json.
+        register("hexCli") {
+            server()
+            name("HexCLI Server (Forge)")
+            runDir("run/hexcli")
+            property("mielib.hexcli", "true")
+            // Forge runs with -Djava.net.preferIPv6Addresses=system, so MieLib's HexCLI endpoint would bind to [::1]
+            // while hexcli/client.json says 127.0.0.1 ("Connection refused"). Force IPv4 for this run.
+            property("java.net.preferIPv4Stack", "true")
+            programArgs("nogui")
+            ideConfigGenerated(false)
+        }
+{% endif %}
     }
 }
 
@@ -111,3 +128,7 @@ tasks {
         exclude("fabric.mod.json")
     }
 }
+{% if use_mielib %}
+
+configureHexCliServer()
+{% endif %}

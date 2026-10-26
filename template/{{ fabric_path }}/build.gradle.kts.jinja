@@ -1,4 +1,5 @@
 {% if use_mielib %}
+import {{ modid }}.utils.configureHexCliServer
 import {{ modid }}.utils.extractNestedJar
 
 {% endif %}plugins {
@@ -115,43 +116,5 @@ dependencies {
 }
 {% if use_mielib %}
 
-tasks {
-    // `./gradlew runHexCli -PacceptEula=true` writes eula.txt (you are accepting the Minecraft EULA:
-    // https://aka.ms/MinecraftEULA) and a loopback-only server.properties, then starts the HexCLI server.
-    val prepareHexCliServer by registering {
-        val runDir = file("run/hexcli")
-        val acceptEula = providers.gradleProperty("acceptEula").map { it.isEmpty() || it.toBoolean() }.orElse(false)
-        doLast {
-            runDir.mkdirs()
-            val eula = runDir.resolve("eula.txt")
-            if (acceptEula.get()) {
-                eula.writeText("# accepted via -PacceptEula=true (https://aka.ms/MinecraftEULA)\neula=true\n")
-            } else if (!eula.readTextOrNull().orEmpty().contains("eula=true")) {
-                throw GradleException("Accept the Minecraft EULA first: ./gradlew runHexCli -PacceptEula=true (https://aka.ms/MinecraftEULA)")
-            }
-            val props = runDir.resolve("server.properties")
-            if (!props.exists()) {
-                props.writeText(
-                    listOf(
-                        "server-ip=127.0.0.1",
-                        "online-mode=false",
-                        "spawn-protection=0",
-                        "level-type=minecraft\\:flat",
-                        "generate-structures=false",
-                        "spawn-npcs=false",
-                        "spawn-animals=false",
-                        "spawn-monsters=false",
-                        "view-distance=4",
-                        "simulation-distance=4",
-                    ).joinToString("\n", postfix = "\n")
-                )
-            }
-        }
-    }
-    named("runHexCli") {
-        dependsOn(prepareHexCliServer)
-    }
-}
-
-fun File.readTextOrNull(): String? = if (exists()) readText() else null
+configureHexCliServer()
 {% endif %}
