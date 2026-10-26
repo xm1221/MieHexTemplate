@@ -85,10 +85,10 @@ jobs:
       - name: Check the rename script on a copy
         run: |
           cp -r starter rename-test
-          rm -rf rename-test/build rename-test/*/build rename-test/.gradle
+          find rename-test \( -name build -o -name .gradle -o -name .kotlin \) -type d -prune -exec rm -rf {} +
           cd rename-test
           python3 rename-mod.py --modid renamecheck --package com.example.renamecheck --name "Rename Check"
-          ! grep -rIl --exclude-dir=.git --exclude=rename-mod.py "$STARTER_MODID" . || { echo "leftover old mod id"; exit 1; }
+          ! grep -rIl --exclude-dir=.git --exclude-dir=build --exclude-dir=.gradle --exclude-dir=.kotlin --exclude=rename-mod.py "$STARTER_MODID" . || { echo "leftover old mod id"; exit 1; }
           ./gradlew build --no-daemon
 
       - name: Push to the template repo
@@ -98,7 +98,8 @@ jobs:
         run: |
           if [ -z "$PUSH_TOKEN" ]; then echo "::error::secret $TOKEN_SECRET_NAME is not set"; exit 1; fi
           cd starter
-          rm -rf .git build */build .gradle
+          rm -rf .git
+          find . \( -name build -o -name .gradle -o -name .kotlin \) -type d -prune -exec rm -rf {} +
           git init -q -b "$TARGET_BRANCH"
           git config user.name "$COMMIT_AUTHOR_NAME"
           git config user.email "$COMMIT_AUTHOR_EMAIL"
