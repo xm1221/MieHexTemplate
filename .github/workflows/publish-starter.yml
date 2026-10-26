@@ -1,0 +1,107 @@
+# Renders this Copier template with its default answers and pushes the result to a separate
+# GitHub *template repository* (Settings -> "Template repository"), so people can click
+# "Use this template" instead of running Copier. starter/rename-mod.py is added so they can
+# swap the default mod id / package / name afterwards.
+#
+# Setup (once):
+#   1. Create the target repo (default xm1221/MieHexTemplate-Starter) and tick "Template repository".
+#   2. Create a fine-grained PAT with "Contents: Read and write" on that repo only, and store it in
+#      this repo as an Actions secret (default name STARTER_REPO_TOKEN).
+#   3. Optionally set repository variables STARTER_REPO / STARTER_BRANCH to override the defaults.
+name: Publish starter template repo
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_repo:
+        description: "owner/name of the GitHub template repo to push to"
+        required: false
+        default: ""
+      target_branch:
+        description: "branch to push to"
+        required: false
+        default: ""
+      dry_run:
+        description: "render + build only, don't push"
+        type: boolean
+        default: false
+  push:
+    tags:
+      - "v*"
+
+env:
+  TARGET_REPO: ${{ inputs.target_repo || vars.STARTER_REPO || 'xm1221/MieHexTemplate-Starter' }}
+  TARGET_BRANCH: ${{ inputs.target_branch || vars.STARTER_BRANCH || 'main' }}
+  # name of the secret that holds the push token; change it here if you use another name
+  TOKEN_SECRET_NAME: STARTER_REPO_TOKEN
+  # default answers used for the starter (keep in sync with OLD in starter/rename-mod.py)
+  STARTER_MODID: miehexaddon
+  STARTER_NAME: MieHex Addon
+  STARTER_CLASSNAME: MieHexAddon
+  STARTER_GITHUB_USER: xm1221
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: template-src
+
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Render template with default answers
+        run: |
+          uvx copier copy --trust --defaults --vcs-ref HEAD \
+            -d modid="$STARTER_MODID" \
+            -d display_name="$STARTER_NAME" \
+            -d github_user="$STARTER_GITHUB_USER" \
+            -d github_repo="$STARTER_MODID" \
+            -d advanced=true \
+            -d classname="$STARTER_CLASSNAME" \
+            -d use_mielib=true \
+            template-src starter
+          cp template-src/starter/rename-mod.py starter/rename-mod.py
+          chmod +x starter/rename-mod.py starter/gradlew
+          if [ -f starter/scripts/hexcli-check.sh ]; then chmod +x starter/scripts/hexcli-check.sh; fi
+          python3 template-src/starter/write-starter-readme.py starter "$GITHUB_REPOSITORY" "$(git -C template-src rev-parse --short HEAD)"
+
+      - name: Check the rendered starter builds
+        working-directory: starter
+        run: ./gradlew build --no-daemon
+
+      - name: Check the rename script on a copy
+        run: |
+          cp -r starter rename-test
+          rm -rf rename-test/build rename-test/*/build rename-test/.gradle
+          cd rename-test
+          python3 rename-mod.py --modid renamecheck --package com.example.renamecheck --name "Rename Check"
+          ! grep -rIl --exclude-dir=.git --exclude=rename-mod.py "$STARTER_MODID" . || { echo "leftover old mod id"; exit 1; }
+          ./gradlew build --no-daemon
+
+      - name: Push to the template repo
+        if: ${{ !inputs.dry_run }}
+        env:
+          PUSH_TOKEN: ${{ secrets[env.TOKEN_SECRET_NAME] }}
+        run: |
+          if [ -z "$PUSH_TOKEN" ]; then echo "::error::secret $TOKEN_SECRET_NAME is not set"; exit 1; fi
+          cd starter
+          rm -rf .git build */build .gradle
+          git init -q -b "$TARGET_BRANCH"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git update-index --chmod=+x gradlew rename-mod.py
+          if [ -f scripts/hexcli-check.sh ]; then git update-index --chmod=+x scripts/hexcli-check.sh; fi
+          git commit -qm "Starter generated from $GITHUB_REPOSITORY@$(git -C ../template-src rev-parse --short HEAD)"
+          # a template repo should be a single clean commit; force-push replaces the previous snapshot
+          git push --force "https://x-access-token:${PUSH_TOKEN}@github.com/${TARGET_REPO}.git" "HEAD:${TARGET_BRANCH}"

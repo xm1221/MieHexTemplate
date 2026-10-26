@@ -1,4 +1,7 @@
-plugins {
+{% if use_mielib %}
+import {{ modid }}.utils.extractNestedJar
+
+{% endif %}plugins {
     id("{{ modid }}.platform")
 }
 
@@ -94,6 +97,12 @@ dependencies {
 
     // hexParse: development runtime only (needed by HexCLI)
     modLocalRuntime(libs.hexparse.forge) { isTransitive = false }
+    // hexParse ships its yclib dependency jar-in-jar, which Loom does not load in dev; extract it separately.
+    modLocalRuntime(files(extractNestedJar(
+        libs.hexparse.forge.get().toString(),
+        Regex("""META-INF/jars/yclib-.*\.jar"""),
+        "yclib-forge.jar",
+    )))
 {% endif %}
 }
 

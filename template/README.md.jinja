@@ -3,3 +3,47 @@
 [![powered by hexdoc](https://img.shields.io/endpoint?url=https://hexxy.media/api/v0/badge/hexdoc?label=1)](https://github.com/hexdoc-dev/hexdoc)
 
 {{ description }}
+{% if use_mielib %}
+
+## HexCLI (MieLib) development loop
+
+This project depends on [MieLib](https://github.com/xm1221/MieLib) and is set up for **HexCLI**: a headless
+dedicated server that runs [hexParse](https://modrinth.com/mod/hexparse) code and prints the resulting stack,
+ravenmind and mishaps. hexParse is only on the development runtime; it is not a dependency of the published mod.
+
+```sh
+# 1. start the HexCLI server (Fabric dev server with -Dmielib.hexcli=true). The first time you must accept the
+#    Minecraft EULA (https://aka.ms/MinecraftEULA):
+./gradlew runHexCli -PacceptEula=true
+
+# 2. in another terminal: run the bundled examples (hexcli/examples.tsv) and compare the stacks
+./scripts/hexcli-check.sh
+#    (with no server running, the script starts one itself and stops it afterwards:
+#     ./scripts/hexcli-check.sh --accept-eula)
+
+# 3. see how a parse error and a mishap are reported (this one is expected to FAIL)
+./scripts/hexcli-check.sh -f hexcli/examples-broken.tsv
+```
+
+`scripts/hexcli-check.sh` downloads `hexcli-client.jar` from the MieLib HexCLI release (SHA-256 checked) into
+`.gradle/hexcli/`. To play interactively:
+`java -jar .gradle/hexcli/hexcli-client-*.jar --dir {{ fabric_path }}/run/hexcli`.
+
+The check script tells the failure types apart:
+
+| outcome | looks like | client exit code |
+|---|---|---|
+| `PARSE_ERROR` | `hexParse: Unknown symbol: …`, `hexParse produced no iotas for: …` (bad token dropped before casting) | often **0** |
+| `MISHAP` | `ERRORED` / `INVALID` + `! step N: …` | 1 |
+| `HEXCLI_ERROR` | `hexcli: …` / `[hexcli] …` (connection, arguments) | 1 or 2 |
+
+[`skills/hexcasting/SKILL.md`](skills/hexcasting/SKILL.md) is a full HexCLI / hexParse guide (in Chinese) for both
+humans and AI agents: syntax, pattern names, real outputs and common pitfalls.
+
+MieLib on Forge: no public Forge jar exists yet, so one is vendored in [`libs/`](libs/README.md).
+{% endif %}
+
+## Credits
+
+Generated from [MieHexTemplate](https://github.com/xm1221/MieHexTemplate), which is based on
+[HexDummy v2](https://github.com/FallingColors/hexdummy) by artynova and Falling Colors (MIT).

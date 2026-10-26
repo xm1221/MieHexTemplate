@@ -62,7 +62,8 @@ if [[ ! -f "$CLIENT_JAR" ]]; then
   echo "hexcli-check: downloading $base/$tgz"
   tmp=$(mktemp -d)
   curl -fsSL "$base/$tgz" -o "$tmp/$tgz" && curl -fsSL "$base/SHA256SUMS" -o "$tmp/SHA256SUMS" || { echo "hexcli-check: download failed" >&2; exit 2; }
-  (cd "$tmp" && grep " \*\?$tgz\$" SHA256SUMS | sha256sum -c --status) || { echo "hexcli-check: SHA-256 mismatch for $tgz" >&2; exit 2; }
+  (cd "$tmp" && awk -v f="$tgz" '{n=$2; sub(/^\*/,"",n); sub(/^\.\//,"",n); if (n==f) print $1"  "f}' SHA256SUMS \
+     | grep -q . && awk -v f="$tgz" '{n=$2; sub(/^\*/,"",n); sub(/^\.\//,"",n); if (n==f) print $1"  "f}' SHA256SUMS | sha256sum -c --status) || { echo "hexcli-check: SHA-256 mismatch for $tgz" >&2; exit 2; }
   tar -xzf "$tmp/$tgz" -C "$tmp" hexcli-client.jar || { echo "hexcli-check: hexcli-client.jar not in $tgz" >&2; exit 2; }
   mv "$tmp/hexcli-client.jar" "$CLIENT_JAR"
   rm -rf "$tmp"
@@ -95,6 +96,10 @@ if ! server_up; then
   for _ in $(seq 900); do
     [[ -f "$CLIENT_JSON" ]] && break
     kill -0 "$SERVER_PGID" 2>/dev/null || { echo "hexcli-check: server exited, see build/hexcli-server.log" >&2; tail -n 30 build/hexcli-server.log >&2; exit 2; }
+    if grep -qE 'Failed to start the minecraft server|BUILD FAILED|FAILURE: ' build/hexcli-server.log 2>/dev/null; then
+      echo "hexcli-check: server failed to start, see build/hexcli-server.log" >&2
+      grep -nE 'Caused by|FAILURE|What went wrong|Failed to start' -A2 build/hexcli-server.log | head -n 20 >&2; exit 2
+    fi
     sleep 1
   done
   [[ -f "$CLIENT_JSON" ]] || { echo "hexcli-check: timed out waiting for $CLIENT_JSON" >&2; exit 2; }
