@@ -23,6 +23,7 @@ uv sync && hexdoc build                   # 构建 hexdoc 文档（需要先激�
 本项目依赖 [MieLib](https://github.com/xm1221/MieLib)，并且已经配好了 **HexCLI**。HexCLI 是一个无头的专用服务器，
 你把 [hexParse](https://modrinth.com/mod/hexparse) 代码交给它，它就会施法并打印出结果：栈、渡鸦之思（ravenmind）和事故（mishap）。
 hexParse 只在开发环境运行时加载，**不会**成为你发布出去的模组的依赖。
+HexDebug 和 IoticBlocks 同样是 hexParse 1.12.0 的开发环境依赖。
 
 ```sh
 # 1. 启动 HexCLI 服务器（带 -Dmielib.hexcli=true 的开发服务器）。第一次需要同意 Minecraft EULA（https://aka.ms/MinecraftEULA）：

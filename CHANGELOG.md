@@ -1,5 +1,12 @@
 # Changelog
 
+## MieHexTemplate `0.1.1` - 2026-10-29
+
+### Fixes
+
+- Completed the Hex Casting 0.11.4 development runtime for the default `use_mielib` setup by adding the HexDebug 0.9.1 and IoticBlocks 1.0.2 dependencies required by hexParse 1.12.0.
+- Extract HexDebug's nested core jar for Loom development runs, fixing Forge datagen's `ClassNotFoundException`/`ClassMetadataNotFoundException` for HexDebug API classes.
+
 ## MieHexTemplate `0.1.0` - 2026-10-26
 
 Forked from HexDummy v2.2.4.

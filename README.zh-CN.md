@@ -13,6 +13,7 @@ MieHexTemplate 是从 [HexDummy v2](https://github.com/FallingColors/hexdummy)�
 - 可选的 **[MieLib](https://github.com/xm1221/MieLib) + HexCLI 开发流程**。生成项目时会问你 `use_mielib`，默认是“是”。选了以后会多出这些：
   - MieLib，两端都以 Jar-in-Jar 方式打包进你的模组。Fabric 版直接从 MieLib 的 GitHub Release 下载，Forge 版目前没有公开下载，所以放在 `libs/` 里随模板分发。
   - [hexParse](https://modrinth.com/mod/hexparse)，**只在开发环境运行时加载**，不会成为你发布出去的模组的依赖。
+  - HexDebug 和 IoticBlocks 也只用于开发环境，补齐 hexParse 1.12.0 的运行时依赖；模板会把 HexDebug 的核心 Jar-in-Jar 展开给 Loom 开发运行使用。
   - `./gradlew :fabric:runHexCli -PacceptEula=true` 和 `./gradlew :forge:runHexCli -PacceptEula=true`，分别启动开启了 `-Dmielib.hexcli=true` 的无头 Fabric / Forge 开发服务器。
   - `scripts/hexcli-check.sh`：把 `hexcli/examples.tsv` 里的例子逐条交给 `hexcli-client -e` 执行，核对栈和消息，并且能区分「解析错误」（`hexParse: Unknown symbol`）和「事故」（mishap）。
   - `skills/hexcasting/SKILL.md`：HexCLI / hexParse 速查手册，人和 AI 都能看。

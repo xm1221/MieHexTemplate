@@ -114,6 +114,15 @@ dependencies {
 
     // hexParse: development runtime only (needed by HexCLI)
     modLocalRuntime(libs.hexparse.forge) { isTransitive = false }
+    // hexParse 1.12.0 loads HexDebug compatibility classes; HexDebug in turn requires IoticBlocks.
+    modLocalRuntime(libs.hexdebug.forge) { isTransitive = false }
+    modLocalRuntime(libs.ioticblocks.forge) { isTransitive = false }
+    // Loom does not load HexDebug's core Jar-in-Jar automatically in the development runtime.
+    modLocalRuntime(files(extractNestedJar(
+        libs.hexdebug.forge.get().toString(),
+        Regex("""META-INF/jars/hexdebug-core-forge-.*\.jar"""),
+        "hexdebug-core-forge.jar",
+    )))
     // hexParse ships its yclib dependency jar-in-jar, which Loom does not load in dev; extract it separately.
     modLocalRuntime(files(extractNestedJar(
         libs.hexparse.forge.get().toString(),

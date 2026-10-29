@@ -63,7 +63,8 @@ start-and-connect.bat
 `eula.txt` / `server.properties` 不覆盖）。校验：`<java> -jar hexcli-installer.jar verify --dir server`。
 
 安装包里的 mod（来自 `hexcli-manifest.json`）：mielib、fabric-api 0.87.0、fabric-language-kotlin 1.13.7、architectury 9.2.14、
-hexcasting 0.11.4、paucal 0.6.0、patchouli 84、inline 1.2.2、cardinal-components-api 5.2.1、cloth-config 11.1.106、hexParse 1.12.0。
+hexcasting 0.11.4、paucal 0.6.0、patchouli 84、inline 1.2.2、cardinal-components-api 5.2.1、cloth-config 11.1.106、hexParse 1.12.0、
+hexdebug 0.9.1、ioticblocks 1.0.2。
 **不含 MieHex / Revolution**（见第 5 节怎么加）。
 
 启动成功的标志（服务器日志）：

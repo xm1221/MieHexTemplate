@@ -62,6 +62,13 @@ hexcli = "1.0.0"
 # hexParse (dev runtime only): Modrinth version ids for 1.20.1-1.12.0
 hexparse-fabric = "wt2k5ALr"
 hexparse-forge = "EcCjvGFr"
+# hexParse 1.12.0 loads HexDebug's client compatibility classes even during Forge datagen.
+# HexDebug 0.9.x is the release line updated for Hex Casting 0.11.4 and requires IoticBlocks.
+# These are Modrinth version ids for 1.20.1 and are only added to the development runtime.
+hexdebug-fabric = "641HJOJm"
+hexdebug-forge = "IGJWRG2Y"
+ioticblocks-fabric = "SJMDeeZs"
+ioticblocks-forge = "vLJ8yO47"
 {% endif %}
 
 # other dependencies
@@ -130,6 +137,10 @@ mielib-forge  = { module="libs:mielib-forge", version.ref="mielib" }
 
 hexparse-fabric = { module="maven.modrinth:hexparse", version.ref="hexparse-fabric" }
 hexparse-forge  = { module="maven.modrinth:hexparse", version.ref="hexparse-forge" }
+hexdebug-fabric = { module="maven.modrinth:hexdebug", version.ref="hexdebug-fabric" }
+hexdebug-forge  = { module="maven.modrinth:hexdebug", version.ref="hexdebug-forge" }
+ioticblocks-fabric = { module="maven.modrinth:ioticblocks", version.ref="ioticblocks-fabric" }
+ioticblocks-forge  = { module="maven.modrinth:ioticblocks", version.ref="ioticblocks-forge" }
 {% endif %}
 
 asm          = { module="org.ow2.asm:asm", version.ref="asm" }

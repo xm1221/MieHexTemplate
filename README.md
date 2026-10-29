@@ -13,6 +13,7 @@ MieHexTemplate is a fork of [HexDummy v2](https://github.com/FallingColors/hexdu
 - An optional **[MieLib](https://github.com/xm1221/MieLib) + HexCLI** development loop (the `use_mielib` question, default **yes**):
   - MieLib as a Jar-in-Jar dependency on both loaders. Fabric comes from MieLib's GitHub release; Forge is vendored in `libs/`.
   - [hexParse](https://modrinth.com/mod/hexparse) as a **dev-runtime-only** dependency, never shipped.
+  - HexDebug and IoticBlocks as **dev-runtime-only** dependencies for hexParse 1.12.0; HexDebug's core Jar-in-Jar is extracted for Loom development runs.
   - `./gradlew :fabric:runHexCli -PacceptEula=true` and `./gradlew :forge:runHexCli -PacceptEula=true`, headless Fabric / Forge dev servers with `-Dmielib.hexcli=true`.
   - `scripts/hexcli-check.sh`, which runs `hexcli/examples.tsv` through `hexcli-client -e`. It compares stacks and messages, and reports parse errors (`hexParse: Unknown symbol`) separately from mishaps.
   - `skills/hexcasting/SKILL.md`, a HexCLI / hexParse cheat sheet for humans and AI agents.
